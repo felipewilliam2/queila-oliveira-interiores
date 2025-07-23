@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Queila de Oliveira Interiores - Sistema de Gestão</title>
+    <link rel="stylesheet" href="style.css" />
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome para ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  </head>
+  <body>
+    <div id="app" class="container">
+      <!-- NAVIGATION -->
+      <nav class="main-nav">
+        <div class="nav-brand">
+          <h1><i class="fas fa-home"></i> Queila de Oliveira Interiores</h1>
+        </div>
+        <div class="nav-menu">
+          <button class="nav-btn active" data-section="dashboard">
+            <i class="fas fa-tachometer-alt"></i> Dashboard
+          </button>
+          <button class="nav-btn" data-section="cronograma">
+            <i class="fas fa-calendar-alt"></i> Cronograma
+          </button>
+          <button class="nav-btn" data-section="financeiro">
+            <i class="fas fa-dollar-sign"></i> Financeiro
+          </button>
+          <button class="nav-btn" data-section="documentos">
+            <i class="fas fa-folder"></i> Documentos
+          </button>
+          <button class="nav-btn" data-section="diario">
+            <i class="fas fa-book"></i> Diário
+          </button>
+          <button class="nav-btn" data-section="aquisicoes">
+            <i class="fas fa-shopping-cart"></i> Compras
+          </button>
+        </div>
+      </nav>
+
+      <!-- DASHBOARD SECTION -->
+      <section id="dashboard-section" class="section active">
+        <div class="section-header">
+          <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
+          <p>Sistema profissional de gestão de projetos de interiores</p>
+        </div>
+
+        <div class="dashboard-grid">
+          <!-- Progress Card -->
+          <div class="card">
+            <div class="card__body">
+              <h3><i class="fas fa-chart-line"></i> Progresso Geral</h3>
+              <div class="progress-container">
+                <div id="progress-bar" class="progress-bar"></div>
+              </div>
+              <span id="progress-label" class="status"></span>
+            </div>
+          </div>
+
+          <!-- Budget Card -->
+          <div class="card">
+            <div class="card__body">
+              <h3><i class="fas fa-piggy-bank"></i> Alerta de Orçamento</h3>
+              <div id="budget-chart-wrapper" class="chart-container">
+                <canvas id="budget-chart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Next Tasks Card -->
+          <div class="card full-width">
+            <div class="card__body">
+              <h3><i class="fas fa-tasks"></i> Próximas Tarefas</h3>
+              <ul id="next-tasks" class="task-list"></ul>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="card full-width">
+            <div class="card__body">
+              <h3><i class="fas fa-bolt"></i> Ações Rápidas</h3>
+              <div class="quick-actions">
+                <button class="btn btn--primary" onclick="showAddTaskModal()">
+                  <i class="fas fa-plus"></i> Nova Tarefa
+                </button>
+                <button class="btn btn--secondary" onclick="showAddExpenseModal()">
+                  <i class="fas fa-receipt"></i> Registrar Gasto
+                </button>
+                <button class="btn btn--outline" onclick="showSection('cronograma')">
+                  <i class="fas fa-calendar"></i> Ver Cronograma
+                </button>
+                <button class="btn btn--outline" onclick="showAddDiaryModal()">
+                  <i class="fas fa-pen"></i> Diário de Obra
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CRONOGRAMA SECTION -->
+      <section id="cronograma-section" class="section">
+        <div class="section-header">
+          <h2><i class="fas fa-calendar-alt"></i> Cronograma</h2>
+          <p>Gerencie cronogramas de projetos de interiores</p>
+        </div>
+
+        <div class="view-switcher">
+          <button class="view-btn active" data-view="gantt">
+            <i class="fas fa-chart-gantt"></i> Gantt
+          </button>
+          <button class="view-btn" data-view="kanban">
+            <i class="fas fa-columns"></i> Kanban
+          </button>
+          <button class="view-btn" data-view="lista">
+            <i class="fas fa-list"></i> Lista
+          </button>
+        </div>
+
+        <!-- Gantt View -->
+        <div id="gantt-view" class="view-content active">
+          <div class="card">
+            <div class="card__body">
+              <div id="gantt-chart" class="gantt-container"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kanban View -->
+        <div id="kanban-view" class="view-content">
+          <div class="kanban-board">
+            <div class="kanban-column" data-status="A Fazer">
+              <h3><i class="fas fa-clock"></i> A Fazer</h3>
+              <div class="kanban-tasks" id="kanban-todo"></div>
+            </div>
+            <div class="kanban-column" data-status="Em Andamento">
+              <h3><i class="fas fa-play"></i> Em Andamento</h3>
+              <div class="kanban-tasks" id="kanban-progress"></div>
+            </div>
+            <div class="kanban-column" data-status="Concluído">
+              <h3><i class="fas fa-check"></i> Concluído</h3>
+              <div class="kanban-tasks" id="kanban-done"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lista View -->
+        <div id="lista-view" class="view-content">
+          <div class="card">
+            <div class="card__body">
+              <div class="table-container">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Tarefa</th>
+                      <th>Status</th>
+                      <th>Início</th>
+                      <th>Fim</th>
+                      <th>Progresso</th>
+                      <th>Responsável</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tasks-table-body"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FINANCEIRO SECTION -->
+      <section id="financeiro-section" class="section">
+        <div class="section-header">
+          <h2><i class="fas fa-dollar-sign"></i> Gestão Financeira</h2>
+          <p>Controle financeiro completo dos projetos</p>
+        </div>
+
+        <div class="financial-grid">
+          <!-- Budget Overview -->
+          <div class="card">
+            <div class="card__body">
+              <h3><i class="fas fa-chart-pie"></i> Resumo Orçamentário</h3>
+              <div class="budget-summary">
+                <div class="budget-item">
+                  <span class="label">Orçamento Total:</span>
+                  <span class="value" id="total-budget">R$ 15.000,00</span>
+                </div>
+                <div class="budget-item">
+                  <span class="label">Gasto Atual:</span>
+                  <span class="value" id="total-spent">R$ 6.300,00</span>
+                </div>
+                <div class="budget-item">
+                  <span class="label">Restante:</span>
+                  <span class="value" id="remaining-budget">R$ 8.700,00</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Expenses by Category -->
+          <div class="card">
+            <div class="card__body">
+              <h3><i class="fas fa-chart-bar"></i> Gastos por Categoria</h3>
+              <canvas id="category-chart"></canvas>
+            </div>
+          </div>
+
+          <!-- Recent Expenses -->
+          <div class="card full-width">
+            <div class="card__body">
+              <div class="card-header">
+                <h3><i class="fas fa-receipt"></i> Despesas Recentes</h3>
+                <button class="btn btn--primary btn--sm" onclick="showAddExpenseModal()">
+                  <i class="fas fa-plus"></i> Nova Despesa
+                </button>
+              </div>
+              <div class="table-container">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Data</th>
+                      <th>Descrição</th>
+                      <th>Categoria</th>
+                      <th>Valor</th>
+                      <th>Tarefa</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody id="expenses-table-body"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DOCUMENTOS SECTION -->
+      <section id="documentos-section" class="section">
+        <div class="section-header">
+          <h2><i class="fas fa-folder"></i> Documentos e Contatos</h2>
+          <p>Centralize todos os documentos e contatos importantes</p>
+        </div>
+
+        <div class="docs-grid">
+          <!-- Documents -->
+          <div class="card">
+            <div class="card__body">
+              <div class="card-header">
+                <h3><i class="fas fa-file-alt"></i> Documentos</h3>
+                <button class="btn btn--primary btn--sm" onclick="showUploadModal()">
+                  <i class="fas fa-upload"></i> Upload
+                </button>
+              </div>
+              <div id="documents-list" class="documents-list"></div>
+            </div>
+          </div>
+
+          <!-- Contacts -->
+          <div class="card">
+            <div class="card__body">
+              <div class="card-header">
+                <h3><i class="fas fa-address-book"></i> Contatos</h3>
+                <button class="btn btn--primary btn--sm" onclick="showAddContactModal()">
+                  <i class="fas fa-plus"></i> Novo Contato
+                </button>
+              </div>
+              <div id="contacts-list" class="contacts-list"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DIÁRIO SECTION -->
+      <section id="diario-section" class="section">
+        <div class="section-header">
+          <h2><i class="fas fa-book"></i> Diário de Obra</h2>
+          <p>Registre o progresso dos seus projetos de interiores</p>
+        </div>
+
+        <div class="diary-container">
+          <div class="card">
+            <div class="card__body">
+              <div class="card-header">
+                <h3><i class="fas fa-calendar-day"></i> Entradas do Diário</h3>
+                <button class="btn btn--primary" onclick="showAddDiaryModal()">
+                  <i class="fas fa-plus"></i> Nova Entrada
+                </button>
+              </div>
+              <div id="diary-entries" class="diary-entries"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- AQUISIÇÕES SECTION -->
+      <section id="aquisicoes-section" class="section">
+        <div class="section-header">
+          <h2><i class="fas fa-shopping-cart"></i> Planejamento de Aquisições</h2>
+          <p>Gerencie a compra de materiais e mobiliário</p>
+        </div>
+
+        <div class="acquisitions-container">
+          <div class="card">
+            <div class="card__body">
+              <div class="card-header">
+                <h3><i class="fas fa-list-check"></i> Lista de Compras</h3>
+                <button class="btn btn--primary" onclick="showAddItemModal()">
+                  <i class="fas fa-plus"></i> Novo Item
+                </button>
+              </div>
+              <div class="table-container">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Item</th>
+                      <th>Quantidade</th>
+                      <th>Loja Sugerida</th>
+                      <th>Data Limite</th>
+                      <th>Status</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody id="acquisitions-table-body"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- MODALS -->
+    <!-- Add Task Modal -->
+    <div id="add-task-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3><i class="fas fa-plus"></i> Nova Tarefa</h3>
+          <button class="modal-close" onclick="closeModal('add-task-modal')">&times;</button>
+        </div>
+        <form id="add-task-form" class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Título da Tarefa</label>
+            <input type="text" name="title" class="form-control" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Data de Início</label>
+              <input type="date" name="startDate" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Data de Fim</label>
+              <input type="date" name="endDate" class="form-control" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Responsável</label>
+            <input type="text" name="responsible" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Descrição</label>
+            <textarea name="description" class="form-control" rows="3"></textarea>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn--secondary" onclick="closeModal('add-task-modal')">Cancelar</button>
+            <button type="submit" class="btn btn--primary">Criar Tarefa</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Add Expense Modal -->
+    <div id="add-expense-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3><i class="fas fa-receipt"></i> Nova Despesa</h3>
+          <button class="modal-close" onclick="closeModal('add-expense-modal')">&times;</button>
+        </div>
+        <form id="add-expense-form" class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Descrição</label>
+            <input type="text" name="description" class="form-control" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Valor</label>
+              <input type="number" name="amount" class="form-control" step="0.01" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Data</label>
+              <input type="date" name="date" class="form-control" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Categoria</label>
+              <select name="category" class="form-control" required>
+                <option value="">Selecione...</option>
+                <option value="Projeto">Projeto</option>
+                <option value="Materiais">Materiais</option>
+                <option value="Mão de obra">Mão de obra</option>
+                <option value="Mobiliário">Mobiliário</option>
+                <option value="Decoração">Decoração</option>
+                <option value="Outros">Outros</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Tarefa Relacionada</label>
+              <select name="taskId" class="form-control" id="expense-task-select">
+                <option value="">Selecione...</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn--secondary" onclick="closeModal('add-expense-modal')">Cancelar</button>
+            <button type="submit" class="btn btn--primary">Registrar Despesa</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Add Contact Modal -->
+    <div id="add-contact-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3><i class="fas fa-user-plus"></i> Novo Contato</h3>
+          <button class="modal-close" onclick="closeModal('add-contact-modal')">&times;</button>
+        </div>
+        <form id="add-contact-form" class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Nome</label>
+            <input type="text" name="name" class="form-control" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Função</label>
+              <input type="text" name="role" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Telefone</label>
+              <input type="tel" name="phone" class="form-control">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">E-mail</label>
+            <input type="email" name="email" class="form-control">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn--secondary" onclick="closeModal('add-contact-modal')">Cancelar</button>
+            <button type="submit" class="btn btn--primary">Salvar Contato</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Add Diary Entry Modal -->
+    <div id="add-diary-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3><i class="fas fa-pen"></i> Nova Entrada no Diário</h3>
+          <button class="modal-close" onclick="closeModal('add-diary-modal')">&times;</button>
+        </div>
+        <form id="add-diary-form" class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Data</label>
+            <input type="date" name="date" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Título</label>
+            <input type="text" name="title" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Descrição</label>
+            <textarea name="description" class="form-control" rows="4" required></textarea>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn--secondary" onclick="closeModal('add-diary-modal')">Cancelar</button>
+            <button type="submit" class="btn btn--primary">Salvar Entrada</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Add Item Modal -->
+    <div id="add-item-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3><i class="fas fa-shopping-cart"></i> Novo Item de Compra</h3>
+          <button class="modal-close" onclick="closeModal('add-item-modal')">&times;</button>
+        </div>
+        <form id="add-item-form" class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Item</label>
+            <input type="text" name="item" class="form-control" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Quantidade</label>
+              <input type="text" name="quantity" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Loja Sugerida</label>
+              <input type="text" name="store" class="form-control">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Data Limite</label>
+            <input type="date" name="deadline" class="form-control" required>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn--secondary" onclick="closeModal('add-item-modal')">Cancelar</button>
+            <button type="submit" class="btn btn--primary">Adicionar Item</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
+
